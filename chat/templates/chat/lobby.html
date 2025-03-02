@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket 테스트</title>
+    <title>WebSocket 스트리밍 테스트</title>
 </head>
 <body>
-    <h1>제발 제발제발 성공해라 제발제발제발제발</h1>
+    <h1>스트리밍은되는데 왜 보여주질 못하니</h1>
     <div>
         <input type="text" id="userMessage" placeholder="메시지를 입력하세요">
         <button onclick="sendMessage()">전송</button>
@@ -23,10 +23,15 @@
             console.log("WebSocket 연결 성공!");
         };
 
+        let currentResponse = '';  // 현재 응답 상태 저장
+
         socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
             console.log("GPT-4o 응답:", data.response);
-            document.getElementById("response").innerHTML = "응답: " + data.response;
+
+            // 실시간으로 응답을 화면에 갱신
+            currentResponse += data.response;  // 새로 들어온 응답을 이어 붙이기
+            document.getElementById("response").innerHTML = currentResponse;
         };
 
         socket.onerror = function (error) {
@@ -47,6 +52,8 @@
             if (message) {
                 socket.send(JSON.stringify({ message: message }));
                 document.getElementById("userMessage").value = ''; // 입력창 비우기
+                currentResponse = '';  // 메시지 전송 시 기존 응답 초기화
+                document.getElementById("response").innerHTML = '';  // 화면 초기화
             } else {
                 alert("메시지를 입력하세요.");
             }
