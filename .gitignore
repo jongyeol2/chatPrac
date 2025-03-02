@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django,windows,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,windows,python
 
+# Redis
+dump.rdb
 ### Django ###
 *.log
 *.pot

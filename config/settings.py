@@ -47,6 +47,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Third-party apps
     'daphne',
     'channels',
     
@@ -57,7 +58,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third-party apps
     
     # Local apps
     'chat',
@@ -66,20 +66,21 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'config.asgi.application'
 
 
-CHANNEL_LAYERS = {
-    'default':{
-        'BACKEND':'channels.layers.InMemoryChannelLayer'
-    }
-}
-
 # CHANNEL_LAYERS = {
 #     'default':{
-#         'BACKEND':'channels.layers.RedisChannelLayer',
-#         'CONFIG': {
-#             'hosts': [{"127.0.0.1", 6379}],
-#         }
+#         'BACKEND':'channels.layers.InMemoryChannelLayer'
 #     }
 # }
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],  # Redis 서버가 로컬에서 6379 포트를 사용한다고 가정
+        },
+    },
+}
+
 
 
 MIDDLEWARE = [
