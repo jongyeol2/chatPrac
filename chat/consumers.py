@@ -1,47 +1,29 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
-from asgiref.sync import async_to_sync
+from channels.generic.websocket import AsyncWebsocketConsumer
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
 
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.room_group_name = 'test'
-        
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name
-        )
-        
-        self.accept()
-        
-        
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
     
+    async def disconnect(self, close_code):
+        pass
     
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        user_message = data['message']
         
-        print('Message:', message)
+        llm_response = await self.llm_response(user_message)
         
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type':'chat_message',
-                'message':message
-            }
-        )
-    
-    def chat_message(self, event):
-        message = event['message']
-        
-        self.send(text_data=json.dumps({
-            'type':'chat',
-            'message':message
+        await self.send(text_data=json.dumps({
+            'response': llm_response
         }))
     
-    
-    
-    # def disconnect(self, code):
-    #     return super().disconnect(code)
-
-
+    async def llm_response(self, user_message):
+        model = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        chain = model | StrOutputParser()
+        
+        response = chain.invoke(user_message)
+        return response

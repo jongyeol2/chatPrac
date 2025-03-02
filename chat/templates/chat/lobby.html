@@ -1,52 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로비</title>
+    <title>WebSocket 테스트</title>
 </head>
 <body>
-    <h1>ㅎㅇㅎㅇ</h1>
-    <form id="form">
-        <input type="text" name="message"/>
-    </form>
-
-    <div id="messages">
-
+    <h1>제발 제발제발 성공해라 제발제발제발제발</h1>
+    <div>
+        <input type="text" id="userMessage" placeholder="메시지를 입력하세요">
+        <button onclick="sendMessage()">전송</button>
+    </div>
+    
+    <div id="response">
+        <!-- GPT-4o 응답을 여기에 표시 -->
     </div>
 
+    <script>
+        const socket = new WebSocket("ws://localhost:8000/ws/chat/");
+        
+        socket.onopen = function () {
+            console.log("WebSocket 연결 성공!");
+        };
 
-    <script type="text/javascript">
-        let url = `ws://${window.location.host}/ws/socket-server/`
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            console.log("GPT-4o 응답:", data.response);
+            document.getElementById("response").innerHTML = "응답: " + data.response;
+        };
 
-        const chatSocket = new WebSocket(url)
+        socket.onerror = function (error) {
+            console.log("WebSocket 에러:", error);
+            alert("WebSocket 연결에 문제가 발생했습니다.");
+        };
 
-        chatSocket.onmessage = function(e){
-            let data = JSON.parse(e.data)
-            console.log('DATA:', data)
-
-            if(data.type === 'chat'){
-                let messages = document.getElementById('messages')
-
-                messages.insertAdjacentHTML('beforeend', `<div>
-                                        <p>${data.message}</p>
-                                    </div>`)
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                console.log("WebSocket 연결이 정상적으로 종료되었습니다.");
+            } else {
+                console.log("WebSocket 연결 종료에 문제가 있었습니다.");
             }
+        };
 
-
+        function sendMessage() {
+            const message = document.getElementById("userMessage").value;
+            if (message) {
+                socket.send(JSON.stringify({ message: message }));
+                document.getElementById("userMessage").value = ''; // 입력창 비우기
+            } else {
+                alert("메시지를 입력하세요.");
+            }
         }
-
-        let form = document.getElementById('form')
-        form.addEventListener('submit', (e)=> {
-            e.preventDefault()
-            let message = e.target.message.value
-            chatSocket.send(JSON.stringify({
-                'message':message
-            }))
-            form.reset()
-        })
-
     </script>
-
 </body>
 </html>
